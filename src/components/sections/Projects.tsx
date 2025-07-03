@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger'
+import Image from 'next/image'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -20,7 +21,7 @@ const projects: Project[] = [
     title: '3D E-commerce Platform',
     description: 'An immersive shopping experience with 3D product visualization and AR capabilities.',
     tags: ['React', 'Three.js', 'Node.js'],
-    image: '/project1.jpg',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=600&fit=crop',
     bgColor: 'bg-gradient-to-br from-blue-400 to-purple-500',
   },
   {
@@ -28,7 +29,7 @@ const projects: Project[] = [
     title: 'Interactive Dashboard',
     description: 'Real-time data visualization with animated charts and custom widgets.',
     tags: ['Next.js', 'D3.js', 'Tailwind CSS'],
-    image: '/project2.jpg',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=600&fit=crop',
     bgColor: 'bg-gradient-to-br from-green-400 to-teal-500',
   },
   {
@@ -36,7 +37,7 @@ const projects: Project[] = [
     title: 'AI-Powered App',
     description: 'Machine learning application with custom trained models and intuitive UI.',
     tags: ['Python', 'TensorFlow', 'React'],
-    image: '/project3.jpg',
+    image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=600&fit=crop',
     bgColor: 'bg-gradient-to-br from-yellow-400 to-orange-500',
   },
   {
@@ -44,7 +45,7 @@ const projects: Project[] = [
     title: 'Virtual Reality Experience',
     description: 'Web-based VR tour with WebXR and interactive elements.',
     tags: ['Three.js', 'WebXR', 'GSAP'],
-    image: '/project4.jpg',
+    image: 'https://images.unsplash.com/photo-1592478411213-6153e4ebc696?w=800&h=600&fit=crop',
     bgColor: 'bg-gradient-to-br from-pink-400 to-red-500',
   },
 ]
@@ -55,11 +56,15 @@ export default function Projects() {
   const titleRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    gsap.registerPlugin(ScrollTrigger)
+    
     if (!titleRef.current || !projectItemsRef.current || !projectsRef.current) return
 
     // Title animation
     gsap.fromTo(
-      titleRef.current.children,
+      Array.from(titleRef.current.children),
       { y: 100, opacity: 0 },
       {
         y: 0,
@@ -160,7 +165,7 @@ export default function Projects() {
           <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
             Featured <span className="gradient-text">Projects</span>
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-primary-light to-accent-light dark:from-primary-dark dark:to-accent-dark mx-auto mb-8"></div>
+          <div className="w-20 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto mb-8"></div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Here are some of my recent projects that showcase my skills and creativity.
           </p>
@@ -176,10 +181,14 @@ export default function Projects() {
               className={`card transform transition-all duration-500 hover:z-10 hover:shadow-3xl ${project.bgColor} bg-opacity-10 dark:bg-opacity-20 backdrop-blur-sm`}
             >
               <div className="h-60 relative overflow-hidden rounded-t-2xl">
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  className="object-cover transition-transform duration-500 hover:scale-110"
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 z-10"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className={`w-32 h-32 rounded-full ${project.bgColor} opacity-20 blur-xl`}></div>
-                </div>
                 <div className="absolute bottom-6 left-6 z-20">
                   <h3 className="text-2xl font-bold text-white">{project.title}</h3>
                 </div>
@@ -197,7 +206,7 @@ export default function Projects() {
                   ))}
                 </div>
                 <div className="flex justify-between items-center">
-                  <button className="text-primary-light dark:text-primary-dark font-medium hover:underline flex items-center">
+                  <button className="text-indigo-500 font-medium hover:underline flex items-center">
                     View Case Study
                     <svg
                       className="w-4 h-4 ml-1"

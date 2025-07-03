@@ -24,7 +24,7 @@ export default function About() {
 
   const skills: Skill[] = [
     { name: 'Next.js', level: 90, color: 'bg-red-500', description: 'Server-side rendering and static site generation' },
-    { name: 'React', level: 95, color: 'bg-grey-400', description: '3+ years building complex applications' },
+    { name: 'React', level: 95, color: 'bg-blue-500', description: '3+ years building complex applications' },
     { name: 'Three.js', level: 85, color: 'bg-green-400', description: 'Interactive 3D web experiences' },
     { name: 'GSAP', level: 90, color: 'bg-purple-400', description: 'Advanced animations and scroll effects' },
     { name: 'Node.js', level: 88, color: 'bg-green-500', description: 'Backend services and APIs' },
@@ -32,10 +32,12 @@ export default function About() {
     { name: 'UI/UX Design', level: 78, color: 'bg-pink-400', description: 'User-centered design principles' },
     { name: 'TypeScript', level: 80, color: 'bg-indigo-400', description: 'Strongly typed JavaScript development' },
     { name: 'Tailwind CSS', level: 85, color: 'bg-orange-400', description: 'Utility-first CSS framework' },
-    { name: 'HTML/CSS', level: 90, color: 'bg-white-400', description: 'Semantic and accessible web standards' },
+    { name: 'HTML/CSS', level: 90, color: 'bg-teal-400', description: 'Semantic and accessible web standards' },
   ]
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
     gsap.registerPlugin(ScrollTrigger)
 
     if (!aboutRef.current || !skillsRef.current) return
@@ -91,21 +93,22 @@ export default function About() {
         }
       )
     }
+    
     return () => {
-        aboutTimeline.kill()
-        ScrollTrigger.getAll().forEach(trigger => trigger.kill())
-      }
+      aboutTimeline.kill()
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+    }
   }, [inView])
 
   return (
-    <section id="about" ref={ref} className="py-20 bg-gradient-to-b from-background-light to-gray-100 dark:from-background-dark dark:to-gray-900">
+    <section id="about" ref={ref} className="py-20 bg-gradient-to-b from-white to-gray-100 dark:from-gray-800 dark:to-gray-900">
       <div className="container mx-auto px-6">
         <div ref={aboutRef} className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
             About <span className="gradient-text">Me</span>
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-primary-light to-accent-light dark:from-primary-dark dark:to-accent-dark mx-auto mb-8"></div>
-          <p className="animate-word text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+          <div className="w-20 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto mb-8"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             I&apos;m a passionate developer with expertise in creating immersive web experiences that combine
             functionality with stunning visuals.
           </p>
@@ -116,22 +119,22 @@ export default function About() {
             <h3 className="text-2xl font-semibold text-gray-800 dark:text-white mb-6">
               My <span className="gradient-text">Journey</span>
             </h3>
-            <p className="text-gray-600 animate-word animate-word dark:text-gray-300 mb-4 leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
               With over 5 years in the industry, I&apos;ve worked with startups and Fortune 500 companies
               to create digital products that users love. My approach combines technical excellence
               with creative design thinking.
             </p>
-            <p className="text-gray-600 animate-word dark:text-gray-300 mb-4 leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">
               I specialize in building performant, accessible, and visually striking web applications
               using modern JavaScript frameworks and cutting-edge CSS techniques.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-4">
               <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <h4 className="font-bold text-primary-light dark:text-primary-dark mb-2">5+</h4>
+                <h4 className="font-bold text-indigo-500 mb-2">5+</h4>
                 <p className="text-gray-600 dark:text-gray-300">Years Experience</p>
               </div>
               <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                <h4 className="font-bold text-primary-light dark:text-primary-dark mb-2">50+</h4>
+                <h4 className="font-bold text-indigo-500 mb-2">50+</h4>
                 <p className="text-gray-600 dark:text-gray-300">Projects Completed</p>
               </div>
             </div>
@@ -150,7 +153,7 @@ export default function About() {
                   onMouseLeave={() => setActiveSkill(null)}
                 >
                   <div className="flex justify-between mb-2">
-                    <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-primary-light dark:group-hover:text-primary-dark transition-colors">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium group-hover:text-indigo-500 transition-colors">
                       {skill.name}
                     </span>
                     <span className="text-gray-500 dark:text-gray-400">

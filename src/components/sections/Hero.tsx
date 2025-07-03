@@ -11,25 +11,35 @@ import type { Mesh, Material } from 'three'
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
+
 // Define types for GLTF model
 type GLTFResult = {
   nodes: {
-    Cube: Mesh
-    Screen: Mesh
-    Keyboard: Mesh
+    [key: string]: Mesh
   }
   materials: {
-    Material: Material
-    Screen: Material
-    Keyboard: Material
+    [key: string]: Material
   }
 }
 
-// 3D Model Component
+// 3D Model Component with fallback
 function LaptopModel() {
   const group = useRef<THREE.Group>(null)
-  const [error] = useState<string | null>(null)
-  const { nodes, materials } = useGLTF('/assets/model/3d_model.glb') as unknown as GLTFResult
+  const [modelLoaded, setModelLoaded] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  
+  let gltf: GLTFResult | null = null
+  
+  try {
+    gltf = useGLTF('/assets/model/3d_laptop.glb') as unknown as GLTFResult
+    if (gltf && !modelLoaded) {
+      setModelLoaded(true)
+    }
+  } catch (err) {
+    if (!error) {
+      setError('Model failed to load')
+    }
+  }
   
   useFrame((state) => {
     if (!group.current) return
@@ -57,60 +67,52 @@ function LaptopModel() {
     )
   })
 
-  // 3. Show error message if model fails to load
-  if (error) {
+  // Fallback geometric laptop if model fails
+  if (error || !gltf) {
     return (
-      <Html center>
-        <div className="text-red-500">Failed to load 3D model</div>
-      </Html>
+      <group ref={group} dispose={null}>
+        {/* Laptop base */}
+        <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
+          <boxGeometry args={[3, 0.2, 2]} />
+          <meshStandardMaterial color="#2d3748" />
+        </mesh>
+        {/* Laptop screen */}
+        <mesh position={[0, 0.8, -0.9]} rotation={[-0.2, 0, 0]} castShadow receiveShadow>
+          <boxGeometry args={[2.8, 1.8, 0.1]} />
+          <meshStandardMaterial color="#1a202c" />
+        </mesh>
+        {/* Screen content */}
+        <mesh position={[0, 0.8, -0.85]} rotation={[-0.2, 0, 0]}>
+          <planeGeometry args={[2.6, 1.6]} />
+          <meshStandardMaterial color="#4299e1" emissive="#4299e1" emissiveIntensity={0.3} />
+        </mesh>
+      </group>
     )
   }
 
-  // 4. Verify nodes exist before rendering
-  if (!nodes?.Cube || !nodes?.Screen || !nodes?.Keyboard) {
-    return (
-      <Html center>
-        <div className="text-green-500">Loading 3D model...</div>
-      </Html>
-    )
-  }
+  // Try to render the actual model
+  const firstNode = Object.values(gltf.nodes)[0]
+  const firstMaterial = Object.values(gltf.materials)[0]
 
   return (
     <group ref={group} dispose={null}>
-      <group rotation={[0.1, 0, 0]}>
-        <mesh 
-          geometry={nodes.Cube.geometry} 
-          material={materials.Material}
-          position={[0, 0.05, 0]}
-          rotation={[0, 0, 0]}
-          castShadow
-          receiveShadow
-        />
-        <mesh 
-          geometry={nodes.Screen.geometry} 
-          material={materials.Screen} 
-          position={[0, 0.04, -0.1]} 
-          rotation={[0, 0, 0]}
-          castShadow
-          receiveShadow
-        />
-        <mesh 
-          geometry={nodes.Keyboard.geometry} 
-          material={materials.Keyboard} 
-          position={[0, -0.03, 0.02]} 
-          castShadow
-          receiveShadow
-        />
-      </group>
+      <mesh 
+        geometry={firstNode?.geometry} 
+        material={firstMaterial}
+        castShadow
+        receiveShadow
+        scale={[2, 2, 2]}
+      />
     </group>
   )
 }
-// 5. Add error boundary
+
+// Error boundary component
 function ModelWithErrorBoundary() {
   return (
     <Suspense fallback={
       <Html center>
-        <div className="text-white">Loading...</div>
+        <div className="text-white bg-black/50 px-4 py-2 rounded">Loading 3D Model...</div>
       </Html>
     }>
       <LaptopModel />
@@ -125,6 +127,10 @@ export default function Hero() {
   const particlesRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    gsap.registerPlugin(ScrollTrigger)
+    
     if (!textRef.current || !particlesRef.current || !heroRef.current || !canvasRef.current) return
     
     // Kill existing animations first
@@ -139,7 +145,7 @@ export default function Hero() {
     
     // Text animation
     tl.fromTo(
-      textRef.current.children,
+      Array.from(textRef.current.children),
       { y: 100, opacity: 0 },
       {
         y: 0,
@@ -170,7 +176,7 @@ export default function Hero() {
     )
 
     // Floating animation for particles
-    Array.from(particles).forEach((particle: Element, i: number) => {
+    particles.forEach((particle: Element, i: number) => {
       gsap.to(particle, {
         y: i % 2 === 0 ? 20 : -20,
         duration: 3 + Math.random() * 2,
@@ -202,23 +208,39 @@ export default function Hero() {
         })
       },
     })
+    
     return () => {
       scrollTrigger.kill()
+      tl.kill()
     }
   }, [])
+
+  const scrollToProjects = () => {
+    const projectsSection = document.getElementById('projects')
+    if (projectsSection) {
+      projectsSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  const scrollToContact = () => {
+    const contactSection = document.getElementById('contact')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
     <section
       id="home"
       ref={heroRef}
-      className="relative h-screen flex items-center justify-center overflow-hidden"
+      className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900"
     >
       {/* Animated background particles */}
       <div ref={particlesRef} className="absolute inset-0 z-0 overflow-hidden">
         {[...Array(30)].map((_, i) => (
           <div
             key={i}
-            className={`absolute rounded-full ${i % 3 === 0 ? 'bg-neon-pink' : i % 3 === 1 ? 'bg-neon-blue' : 'bg-neon-green'}`}
+            className={`absolute rounded-full ${i % 3 === 0 ? 'bg-pink-500' : i % 3 === 1 ? 'bg-blue-500' : 'bg-green-500'}`}
             style={{
               width: `${5 + Math.random() * 10}px`,
               height: `${5 + Math.random() * 10}px`,
@@ -231,25 +253,25 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-background-light dark:to-background-dark"></div>
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-transparent to-gray-900/50"></div>
 
       <div className="container mx-auto px-6 relative z-20">
         <div className="flex flex-col md:flex-row items-center justify-between">
-          <div ref={textRef} className="md:w-1/2">
-            <h1 className="animate-char text-5xl md:text-7xl font-bold mb-6 gradient-text animate-word animate-text">
-              Hi, I&apos;m <span className="neon-text text-primary-light dark:text-primary-dark">Fahadkhan</span>
+          <div ref={textRef} className="md:w-1/2 text-white">
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
+              Hi, I&apos;m <span className="neon-text text-indigo-400">Fahadkhan</span>
             </h1>
-            <h2 className="text-2xl md:text-3xl text-gray-600 dark:text-gray-300 mb-8 animate-pulse-slow">
+            <h2 className="text-2xl md:text-3xl text-gray-300 mb-8 animate-pulse-slow">
               Creative <span className="gradient-text font-bold">Full Stack Developer</span>
             </h2>
-            <p className="text-lg text-gray-500 dark:text-gray-400 mb-8 max-w-lg leading-relaxed">
-              I craft <span className="font-semibold text-primary-light dark:text-primary-dark">immersive digital experiences</span> with cutting-edge technologies and stunning visuals.
+            <p className="text-lg text-gray-400 mb-8 max-w-lg leading-relaxed">
+              I craft <span className="font-semibold text-indigo-400">immersive digital experiences</span> with cutting-edge technologies and stunning visuals.
             </p>
             <div className="flex space-x-4">
-              <button className="btn-primary">
+              <button onClick={scrollToProjects} className="btn-primary">
                 View My Work
               </button>
-              <button className="btn-secondary">
+              <button onClick={scrollToContact} className="btn-secondary">
                 Contact Me
               </button>
             </div>
@@ -261,7 +283,7 @@ export default function Hero() {
                 dpr={[1, 1.5]}
                 shadows
                 camera={{ position: [0, 0, 8], fov: 50 }}
-                gl = {{ antialias: true }}
+                gl={{ antialias: true }}
               >
                 <ambientLight intensity={0.5} />
                 <pointLight 
@@ -271,7 +293,7 @@ export default function Hero() {
                 />
                 <spotLight
                   castShadow
-                  shadow-mapSize={[ 2048, 2048 ]}
+                  shadow-mapSize={[2048, 2048]}
                   shadow-bias={-0.0001}
                   position={[0, 10, 0]} 
                   angle={0.15} 
@@ -280,9 +302,8 @@ export default function Hero() {
                 />
                 <Environment preset="city" />
                 <Float speed={2} rotationIntensity={1} floatIntensity={2}>
-                  <LaptopModel />
+                  <ModelWithErrorBoundary />
                 </Float>
-                <ModelWithErrorBoundary />
                 <OrbitControls 
                   enableZoom={false} 
                   autoRotate 
@@ -299,9 +320,9 @@ export default function Hero() {
       {/* Animated scroll indicator */}
       <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20">
         <div className="animate-bounce-slow flex flex-col items-center">
-          <span className="text-sm text-gray-500 dark:text-gray-400 mb-2">Scroll Down</span>
+          <span className="text-sm text-gray-400 mb-2">Scroll Down</span>
           <svg
-            className="w-6 h-6 text-primary-light dark:text-primary-dark"
+            className="w-6 h-6 text-indigo-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -318,10 +339,4 @@ export default function Hero() {
       </div>
     </section>
   )
-}
-// 6. Preload with error handling
-try {
-  useGLTF.preload('/assets/model/3d_laptop.glb')
-} catch (err) {
-  console.error('Failed to preload model:', err)
 }

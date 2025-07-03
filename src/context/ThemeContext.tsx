@@ -22,6 +22,9 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   // Initialize theme from localStorage or system preference
   useEffect(() => {
     setIsMounted(true)
+    
+    if (typeof window === 'undefined') return
+    
     const savedTheme = localStorage.getItem('theme') as Theme | null
     const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     
@@ -32,10 +35,11 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     // Watch for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleChange = (e: MediaQueryListEvent) => {
-      const newTheme = e.matches ? 'dark' : 'light'
-      setTheme(newTheme)
-      document.documentElement.classList.toggle('dark', newTheme === 'dark')
-      localStorage.setItem('theme', newTheme)
+      if (!localStorage.getItem('theme')) {
+        const newTheme = e.matches ? 'dark' : 'light'
+        setTheme(newTheme)
+        document.documentElement.classList.toggle('dark', newTheme === 'dark')
+      }
     }
     
     mediaQuery.addEventListener('change', handleChange)
@@ -43,6 +47,8 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, [])
 
   const toggleTheme = () => {
+    if (typeof window === 'undefined') return
+    
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
@@ -63,7 +69,7 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   // Don't render UI until mounted on client
   if (!isMounted) {
-    return <div className='hidden' />
+    return <div className="hidden" />
   }
 
   return (

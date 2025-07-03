@@ -20,21 +20,124 @@
   }
 }
 
-@layer components {
-  .btn-primary:hover {
-    @apply opacity-90 transition-opacity duration-200;
+/* Custom base styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    transition: background-color 0.5s ease;
+  }
+  
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+    transition: background-color calc(0.5s * var(--theme-transition)) ease;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold leading-tight;
+  }
+  
+  ::selection {
+    @apply bg-indigo-500/30;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Custom components */
+@layer components {
+  .btn-primary {
+    @apply px-8 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full hover:shadow-lg transform hover:scale-105 transition-all duration-300 hover:brightness-110;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  }
+  
+  .btn-secondary {
+    @apply px-8 py-3 border-2 border-indigo-500 text-indigo-500 rounded-full hover:bg-indigo-500/10 transition-all duration-300 transform hover:scale-105;
+  }
+  
+  .card {
+    @apply bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2;
+  }
+  
+  .neon-text {
+    text-shadow: 0 0 5px currentColor, 0 0 15px currentColor;
+  }
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-600;
+  }
 }
-/* Add this if using GSAP animations */
-html {
-  scroll-behavior: smooth;
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(-1deg);
+  }
 }
-body {
-  overflow-x: hidden;
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(30px) rotate(1deg);
+  }
 }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-indigo-500 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-indigo-600;
+}
+
+/* Utility classes */
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 8s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce-slow {
+  animation: bounce 3s infinite;
+}
+
+/* Neon colors */
+.bg-neon-pink { background-color: #ec4899; }
+.bg-neon-blue { background-color: #3b82f6; }
+.bg-neon-green { background-color: #10b981; }
+.bg-neon-purple { background-color: #8b5cf6; }
+
+/* Theme-specific backgrounds */
+.bg-background-light { background-color: #f8fafc; }
+.bg-background-dark { background-color: #0f172a; }
+.bg-primary-light { background-color: #6366f1; }
+.bg-primary-dark { background-color: #8b5cf6; }
+.bg-accent-light { background-color: #f59e0b; }
+.bg-accent-dark { background-color: #fbbf24; }
+
+/* Text colors */
+.text-primary-light { color: #6366f1; }
+.text-primary-dark { color: #8b5cf6; }
+.text-accent-light { color: #f59e0b; }
+.text-accent-dark { color: #fbbf24; }

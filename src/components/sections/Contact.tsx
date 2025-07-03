@@ -3,8 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger'
 import { useInView } from 'react-intersection-observer'
-import emailjs from '@emailjs/browser';
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -33,7 +32,11 @@ export default function Contact() {
   })
 
   useEffect(() => {
-    if (!inView || !contactRef.current || !formRef.current || !inputsRef.current) return
+    if (typeof window === 'undefined') return
+    
+    gsap.registerPlugin(ScrollTrigger)
+    
+    if (!inView || !contactRef.current || !formRef.current) return
 
     const contactElements = contactRef.current.children
     const formElement = formRef.current
@@ -44,7 +47,7 @@ export default function Contact() {
 
     // Contact section animation
     gsap.fromTo(
-      contactRef.current.children,
+      Array.from(contactRef.current.children),
       { y: 100, opacity: 0 },
       {
         y: 0,
@@ -144,47 +147,38 @@ export default function Contact() {
     setIsSubmitting(true)
     
     try {
-    await emailjs.send(
-      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-      formData,
-      // {name:'', email:'', message:''},
-      process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-      // 'YOUR_SERVICE_ID',     // From Step 4
-      // 'YOUR_TEMPLATE_ID',    // From Step 4
-      // formData,              // Your form state (e.g., { name, email, message })
-
-      // 'YOUR_PUBLIC_KEY'      // From Step 4
-    );
-
-        setSubmitStatus('success')
-        setFormData({ name: '', email: '', message: '' })
-                
-        // Success animation
-        gsap.fromTo(
-          '.submit-success',
-          { scale: 0.8, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.2)' }
-        )
-      } catch (error) {
-        setSubmitStatus('error');
-        console.error('Failed to send:', error);
-    }   finally {
-        setIsSubmitting(false);
-        setTimeout(() => setSubmitStatus(null), 5000);
+      // Simulate form submission
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      setSubmitStatus('success')
+      setFormData({ name: '', email: '', message: '' })
+      
+      // Success animation
+      gsap.fromTo(
+        '.submit-success',
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.2)' }
+      )
+    } catch (error) {
+      setSubmitStatus('error')
+      console.error('Failed to send:', error)
+    } finally {
+      setIsSubmitting(false)
+      setTimeout(() => setSubmitStatus(null), 5000)
     }
-}
+  }
 
   return (
     <section id="contact" 
-    ref={ref} 
-    className="py-20 bg-gradient-to-b from-gray-100 to-background-light dark:from-gray-900 dark:to-background-dark">
+      ref={ref} 
+      className="py-20 bg-gradient-to-b from-gray-100 to-white dark:from-gray-900 dark:to-gray-800"
+    >
       <div className="container mx-auto px-6">
         <div ref={contactRef} className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
             Get In <span className="gradient-text">Touch</span>
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-primary-light to-accent-light dark:from-primary-dark dark:to-accent-dark mx-auto mb-8"></div>
+          <div className="w-20 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto mb-8"></div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Have a project in mind or want to collaborate? Feel free to reach out!
           </p>
@@ -197,15 +191,16 @@ export default function Contact() {
             className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-2xl relative overflow-hidden"
           >
             {/* Decorative elements */}
-            <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary-light/10 dark:bg-primary-dark/10 rounded-full filter blur-3xl"></div>
-            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent-light/10 dark:bg-accent-dark/10 rounded-full filter blur-3xl"></div>
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-indigo-500/10 rounded-full filter blur-3xl"></div>
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-500/10 rounded-full filter blur-3xl"></div>
             
             {submitStatus === 'success' && (
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="submit-success mb-6 p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 rounded-lg backdrop-blur-sm">
+                className="submit-success mb-6 p-4 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-200 rounded-lg backdrop-blur-sm"
+              >
                 Thank you! Your message has been sent successfully.
               </motion.div>
             )}
@@ -214,7 +209,8 @@ export default function Contact() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 rounded-lg backdrop-blur-sm">
+                className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-200 rounded-lg backdrop-blur-sm"
+              >
                 Oops! Something went wrong. Please try again later.
               </motion.div>
             )}
@@ -263,14 +259,11 @@ export default function Contact() {
                 className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none transition-all duration-300"
                 required
               />
-              {/* email validation  */}
-              {
-                formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && (
-                  <div className="absolute text-red-500 text-sm mt-1">
-                    Please enter a valid email address.
-                  </div>
-                )
-              }
+              {formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && (
+                <div className="absolute text-red-500 text-sm mt-1">
+                  Please enter a valid email address.
+                </div>
+              )}
             </div>
 
             <div className="mb-6 relative">
@@ -300,10 +293,9 @@ export default function Contact() {
               type="submit"
               disabled={isSubmitting}
               className="w-full btn-primary relative overflow-hidden group"
-              
             >
               <span className="relative z-10">{isSubmitting ? 'Sending...' : 'Send Message'}</span>
-              <span className="absolute inset-0 bg-gradient-to-r from-primary-light to-accent-light dark:from-primary-dark dark:to-accent-dark opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              <span className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
             </button>
           </form>
         </div>

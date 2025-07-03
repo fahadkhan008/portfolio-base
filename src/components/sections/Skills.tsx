@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/dist/ScrollTrigger'
 import { useInView } from 'react-intersection-observer'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sphere } from '@react-three/drei'
-// import * as THREE from 'three'
 import type { Mesh } from 'three'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -44,6 +43,10 @@ const SkillBar = ({ name, level, color, delay }: SkillBarProps) => {
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    gsap.registerPlugin(ScrollTrigger)
+    
     if (!barRef.current) return
     
     gsap.fromTo(barRef.current,
@@ -111,17 +114,21 @@ export default function Skills() {
     { name: 'UI/UX Design', level: 85, color: 'bg-pink-500' },
     { name: 'Django/Python', level: 88, color: 'bg-red-500' },
     { name: 'JavaScript', level: 90, color: 'bg-yellow-500' },
-    { name: 'TypeScript', level: 78, color: 'bg-indl-500' },
-    { name: 'Tailwind CSS', level: 85, color: 'bg-oranigo-500' },
-    { name: 'HTML', level: 90, color: 'bg-teage-500' },
+    { name: 'TypeScript', level: 78, color: 'bg-indigo-500' },
+    { name: 'Tailwind CSS', level: 85, color: 'bg-orange-500' },
+    { name: 'HTML', level: 90, color: 'bg-teal-500' },
     { name: 'CSS', level: 86, color: 'bg-gray-500' }
   ]
 
   useEffect(() => {
+    if (typeof window === 'undefined') return
+    
+    gsap.registerPlugin(ScrollTrigger)
+    
     if (!inView || !headingRef.current || !sphereContainerRef.current) return
 
     // Heading animation
-    gsap.fromTo(headingRef.current.children,
+    gsap.fromTo(Array.from(headingRef.current.children),
       { y: 50, opacity: 0 },
       {
         y: 0,
@@ -149,9 +156,9 @@ export default function Skills() {
       <div className="container mx-auto px-6">
         <div ref={headingRef} className="text-center mb-16">
           <h2 className="text-4xl font-bold text-gray-800 dark:text-white mb-4">
-            My <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-light to-accent-light dark:from-primary-dark dark:to-accent-dark">Skills</span>
+            My <span className="gradient-text">Skills</span>
           </h2>
-          <div className="w-20 h-1 bg-gradient-to-r from-primary-light to-accent-light dark:from-primary-dark dark:to-accent-dark mx-auto mb-8"></div>
+          <div className="w-20 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto mb-8"></div>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             Technologies I&apos;ve mastered to create exceptional digital experiences
           </p>
