@@ -1,15 +1,5 @@
 import type { NextConfig } from 'next'
 
-module.exports = {
-  turbopack: {
-    // Example: adding an alias and custom file extension
-    resolveAlias: {
-      underscore: 'lodash',
-    },
-    resolveExtensions: ['.mdx', '.tsx', '.ts', '.jsx', '.js', '.json'],
-  },
-}
-
 const nextConfig: NextConfig = {
   images: {
     domains: ['images.unsplash.com'], // Add your image hosts here
