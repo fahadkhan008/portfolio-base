@@ -2,107 +2,47 @@
 import { gsap } from 'gsap'
 import * as THREE from 'three'
 import { Suspense, useEffect, useRef, useState } from 'react'
-import { ScrollTrigger } from 'gsap/dist/ScrollTrigger'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, useGLTF, Environment, Float, Html } from '@react-three/drei'
-import type { Mesh, Material } from 'three'
+import { OrbitControls, Environment, Float, Html } from '@react-three/drei'
+import type { Mesh } from 'three'
 
-// Register GSAP plugins once (client-side only)
+// Register GSAP plugins
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// Define types for GLTF model
-type GLTFResult = {
-  nodes: {
-    [key: string]: Mesh
-  }
-  materials: {
-    [key: string]: Material
-  }
-}
-
-// 3D Model Component with fallback
+// Simple 3D Laptop Component
 function LaptopModel() {
   const group = useRef<THREE.Group>(null)
-  const [modelLoaded, setModelLoaded] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  
-  let gltf: GLTFResult | null = null
-  
-  try {
-    gltf = useGLTF('/assets/model/3d_laptop.glb') as unknown as GLTFResult
-    if (gltf && !modelLoaded) {
-      setModelLoaded(true)
-    }
-  } catch (err) {
-    if (!error) {
-      setError('Model failed to load')
-    }
-  }
   
   useFrame((state) => {
     if (!group.current) return
     
     const t = state.clock.getElapsedTime()
-    group.current.rotation.x = THREE.MathUtils.lerp(
-      group.current.rotation.x, 
-      Math.cos(t / 2) / 10 + 0.25, 
-      0.1
-    )
-    group.current.rotation.y = THREE.MathUtils.lerp(
-      group.current.rotation.y, 
-      Math.sin(t / 4) / 10, 
-      0.1
-    )
-    group.current.rotation.z = THREE.MathUtils.lerp(
-      group.current.rotation.z, 
-      Math.sin(t / 4) / 20, 
-      0.1
-    )
-    group.current.position.y = THREE.MathUtils.lerp(
-      group.current.position.y, 
-      (-5 + Math.sin(t / 2)) / 5, 
-      0.1
-    )
+    group.current.rotation.x = Math.cos(t / 2) / 10 + 0.25
+    group.current.rotation.y = Math.sin(t / 4) / 10
+    group.current.rotation.z = Math.sin(t / 4) / 20
+    group.current.position.y = (-5 + Math.sin(t / 2)) / 5
   })
-
-  // Fallback geometric laptop if model fails
-  if (error || !gltf) {
-    return (
-      <group ref={group} dispose={null}>
-        {/* Laptop base */}
-        <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
-          <boxGeometry args={[3, 0.2, 2]} />
-          <meshStandardMaterial color="#2d3748" />
-        </mesh>
-        {/* Laptop screen */}
-        <mesh position={[0, 0.8, -0.9]} rotation={[-0.2, 0, 0]} castShadow receiveShadow>
-          <boxGeometry args={[2.8, 1.8, 0.1]} />
-          <meshStandardMaterial color="#1a202c" />
-        </mesh>
-        {/* Screen content */}
-        <mesh position={[0, 0.8, -0.85]} rotation={[-0.2, 0, 0]}>
-          <planeGeometry args={[2.6, 1.6]} />
-          <meshStandardMaterial color="#4299e1" emissive="#4299e1" emissiveIntensity={0.3} />
-        </mesh>
-      </group>
-    )
-  }
-
-  // Try to render the actual model
-  const firstNode = Object.values(gltf.nodes)[0]
-  const firstMaterial = Object.values(gltf.materials)[0]
 
   return (
     <group ref={group} dispose={null}>
-      <mesh 
-        geometry={firstNode?.geometry} 
-        material={firstMaterial}
-        castShadow
-        receiveShadow
-        scale={[2, 2, 2]}
-      />
+      {/* Laptop base */}
+      <mesh position={[0, -0.1, 0]} castShadow receiveShadow>
+        <boxGeometry args={[3, 0.2, 2]} />
+        <meshStandardMaterial color="#2d3748" />
+      </mesh>
+      {/* Laptop screen */}
+      <mesh position={[0, 0.8, -0.9]} rotation={[-0.2, 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[2.8, 1.8, 0.1]} />
+        <meshStandardMaterial color="#1a202c" />
+      </mesh>
+      {/* Screen content */}
+      <mesh position={[0, 0.8, -0.85]} rotation={[-0.2, 0, 0]}>
+        <planeGeometry args={[2.6, 1.6]} />
+        <meshStandardMaterial color="#4299e1" emissive="#4299e1" emissiveIntensity={0.3} />
+      </mesh>
     </group>
   )
 }
@@ -125,27 +65,26 @@ export default function Hero() {
   const textRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
   const particlesRef = useRef<HTMLDivElement>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return
     
     gsap.registerPlugin(ScrollTrigger)
     
     if (!textRef.current || !particlesRef.current || !heroRef.current || !canvasRef.current) return
     
-    // Kill existing animations first
-    gsap.killTweensOf([
-      textRef.current.children,
-      particlesRef.current.children,
-      canvasRef.current
-    ])
-
     // Master timeline for hero section
     const tl = gsap.timeline()
     
     // Text animation
+    const textChildren = Array.from(textRef.current.children)
     tl.fromTo(
-      Array.from(textRef.current.children),
+      textChildren,
       { y: 100, opacity: 0 },
       {
         y: 0,
@@ -213,7 +152,7 @@ export default function Hero() {
       scrollTrigger.kill()
       tl.kill()
     }
-  }, [])
+  }, [mounted])
 
   const scrollToProjects = () => {
     const projectsSection = document.getElementById('projects')
@@ -227,6 +166,10 @@ export default function Hero() {
     if (contactSection) {
       contactSection.scrollIntoView({ behavior: 'smooth' })
     }
+  }
+
+  if (!mounted) {
+    return null
   }
 
   return (
@@ -293,8 +236,6 @@ export default function Hero() {
                 />
                 <spotLight
                   castShadow
-                  shadow-mapSize={[2048, 2048]}
-                  shadow-bias={-0.0001}
                   position={[0, 10, 0]} 
                   angle={0.15} 
                   penumbra={1} 

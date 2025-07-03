@@ -1,6 +1,5 @@
 'use client'
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { gsap } from 'gsap'
 
 type Theme = 'light' | 'dark'
 type ThemeContextType = {
@@ -30,7 +29,13 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     
     const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light')
     setTheme(initialTheme)
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark')
+    
+    // Apply theme immediately
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
     
     // Watch for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
@@ -38,7 +43,11 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       if (!localStorage.getItem('theme')) {
         const newTheme = e.matches ? 'dark' : 'light'
         setTheme(newTheme)
-        document.documentElement.classList.toggle('dark', newTheme === 'dark')
+        if (newTheme === 'dark') {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
       }
     }
     
@@ -53,23 +62,17 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     setTheme(newTheme)
     localStorage.setItem('theme', newTheme)
     
-    // Smooth theme transition animation
-    gsap.to(document.documentElement, {
-      '--theme-transition': 1,
-      duration: 0.5,
-      onComplete: () => {
-        document.documentElement.classList.toggle('dark', newTheme === 'dark')
-        gsap.to(document.documentElement, {
-          '--theme-transition': 0,
-          duration: 0.5
-        })
-      }
-    })
+    // Apply theme change immediately
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
   }
 
-  // Don't render UI until mounted on client
+  // Don't render until mounted to prevent hydration mismatch
   if (!isMounted) {
-    return <div className="hidden" />
+    return <div style={{ visibility: 'hidden' }}>{children}</div>
   }
 
   return (
