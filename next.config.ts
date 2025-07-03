@@ -2,8 +2,8 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['images.unsplash.com'], // Add your image hosts here
-    remotePatterns: [ // Recommended alternative to domains in newer Next.js versions
+    domains: ['images.unsplash.com'],
+    remotePatterns: [
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
@@ -11,15 +11,13 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    scrollRestoration: true, // Improved scroll behavior
-    typedRoutes: true, // Enable if using TypeScript for better route typing
+    scrollRestoration: true,
   },
-  // Additional recommended TypeScript-friendly configuration
   typescript: {
-    ignoreBuildErrors: false, // Set to true only during development if needed
+    ignoreBuildErrors: false,
   },
   eslint: {
-    ignoreDuringBuilds: true, // Recommended if you're using separate linting
+    ignoreDuringBuilds: false,
   },
   webpack: (config) => {
     config.module.rules.push({
